@@ -39,10 +39,11 @@ class Favorites extends Component {
                   "Are you sure you wish to delete the favorite campsite " +
                     item.name +
                     "?",
+
                   [
                     {
                       text: "Cancel",
-                      onPress: () => console.log(item.name + "Not Deleted"),
+                      onPress: () => console.log(item.name + " Not Deleted"),
                       style: "cancel",
                     },
                     {
