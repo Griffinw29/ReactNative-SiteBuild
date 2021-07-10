@@ -14,6 +14,8 @@ import {
   Text,
   ScrollView,
   Image,
+  Alert,
+  ToastAndroid,
 } from "react-native";
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer } from "react-navigation";
@@ -28,6 +30,8 @@ import {
   fetchPromotions,
 } from "../redux/ActionCreators";
 import Login from "./LoginComponent";
+import Netinfo from "@react-native-community/netinfo";
+import { thistle } from "color-name";
 
 const mapDispatchToProps = {
   fetchCampsites,
@@ -333,7 +337,45 @@ class Main extends Component {
     this.props.fetchComments();
     this.props.fetchPartners();
     this.props.fetchPromotions();
+
+    Netinfo.fetch().then((connectionInfo) => {
+      Platform.OS === "ios"
+        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+        : ToastAndroid.show(
+            "Initial Network Connectivity Type: " + connectionInfo.type,
+            ToastAndroid.LONG
+          );
+    });
+
+    this.unsubscribeNetInfo = Netinfo.addEventListener((connectionInfo) => {
+      this.handleConnectivityChange(connectionInfo);
+    });
   }
+
+  componentWillUnmount() {
+    this.unsubscribeNetInfo();
+  }
+
+  handleConnectivityChange = (connectionInfo) => {
+    let connectionMsg = "You are now commected to an active network.";
+    switch (connectionInfo.type) {
+      case "none":
+        connectionMsg = "No network connection is active.";
+        break;
+      case "unknown":
+        connectionMsg = "The network connection is unknown.";
+        break;
+      case "cellular":
+        connectionMsg = "You are now connected to a cellular network.";
+        break;
+      case "wifi":
+        connectionMsg = "You are now connected to a Wifi network.";
+        break;
+    }
+    Platform.OS === "ios"
+      ? Alert.alert("Connection Change:", connectionMsg)
+      : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
+  };
 
   render() {
     return (
